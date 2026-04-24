@@ -1,18 +1,14 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
 <p align="center">
-  <img alt="LOGO" src="logo.ico" width="256" height="256" />
+  <img alt="LOGO" src="logo.ico" width="128" height="128" />
 </p>
 
 <div align="center">
 
-## Maa_bbb
+## Maa_bbb_batsp
 
-(识宝小助手)
-
-基于MAA框架制作的崩坏三小助手。图像技术 + 模拟控制，解放双手！由 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 强力驱动！
-
-更多功能敬请期待（提issus）
+(识宝小助手战斗sp版)
 
 自动乐土开发中
 
@@ -27,16 +23,13 @@
 
   <br/>
 </p>
----
+
 
 ## 简介
 
 **Maa_bbb_batssp** 是基于miaojiuqing的mab项目开发的游戏自动化战斗工具，旨在帮助玩家进行自动战斗。  
 **注意：** 本项目目前只支持PC端，其他后续会同步适配，请自己设置为16:9分辨率
 
-
-
----
 <details>
 <summary>PC端使用须知</summary>
 
