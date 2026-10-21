@@ -5,12 +5,13 @@ v1.0.0
 """
 
 from maa.context import Context
-from maa.define import OCRResult
+from maa.define import ColorMatchResult, TemplateMatchResult, OCRResult
 import time
 
 import logging
 import os
 from datetime import datetime, timedelta
+
 
 class CombatActions:
     """通用战斗功能"""
@@ -88,7 +89,7 @@ class CombatActions:
         执行一次攻击操作。
         """
         image = self.context.tasker.controller.post_screencap().wait().get()
-        if self.context.run_recognition("战斗逻辑-战斗中", image):
+        if self.context.run_recognition("战斗中", image):
             return self.context.run_action("攻击_action")
         return False
 
@@ -111,7 +112,7 @@ class CombatActions:
         执行一次闪避操作。
         """
         image = self.context.tasker.controller.post_screencap().wait().get()
-        if self.context.run_recognition("战斗逻辑-战斗中", image):
+        if self.context.run_recognition("战斗中", image):
             return self.context.run_action("闪避_action")
         return False
 
@@ -130,13 +131,13 @@ class CombatActions:
 
     def use_skill(self, duration: int = 0):#武器技
         """
-        使用武器技
-        执行一次武器技释放操作。
-        :param duration: 武器技释放后等待时间(毫秒),默认0
+        使用技能
+        执行一次技能释放操作。
+        :param duration: 技能释放后等待时间(毫秒),默认0
         """
         image = self.context.tasker.controller.post_screencap().wait().get()
-        if self.context.run_recognition("战斗逻辑-战斗中", image):
-            self.context.run_action("武器技_action")
+        if self.context.run_recognition("战斗中", image):
+            self.context.run_action("技能_action")
             time.sleep(duration / 1000)
             return True
         return False
@@ -147,12 +148,12 @@ class CombatActions:
         点击一次必杀
         """
         image = self.context.tasker.controller.post_screencap().wait().get()
-        if self.context.run_recognition("战斗逻辑-战斗中", image):
+        if self.context.run_recognition("战斗中", image):
             self.context.run_action("必杀_action")
             time.sleep(duration / 150)
             return True
         return False
-    def long_ultimate_skill(self, duration: int = 500):# 特殊必杀(长按必杀),eg:终焉大招
+    def long_press_ultimate_skill(self, duration: int = 500):# 特殊必杀(长按必杀),eg:终焉大招
         """
         长按必杀
         按住必杀键一段时间。
@@ -186,29 +187,18 @@ class CombatActions:
         )
         return self.context.run_action("松开攻击_action")
 
-    def trigger_qte(self, target: int = 1, elysian_realm: bool = False):
+    def trigger_qte(self, target: int = 1):
         """
         触发QTE/换人
         执行QTE或换人操作。
         :param target: QTE位置(1或2),默认1
-        :param elysian_realm: 是否为乐土(英桀支援)QTE。为 True 时会跳过“战斗中”检测，直接点击。
         :return: 点击操作结果
         """
+        image = self.context.tasker.controller.post_screencap().wait().get()
+        if not self.context.run_recognition("战斗中", image):
+            return False
         if target not in (1, 2):
             raise ValueError("target 参数必须为 1 或 2")
-
-        # 模式：
-        # - 普通模式：只响应 trigger_qte(x)
-        # - 乐土模式：只响应 trigger_qte(x, True)
-        elysian_mode_node = self.context.get_node_data("乐土模式")
-        in_elysian_mode = bool(elysian_mode_node and elysian_mode_node.get("enabled", False))
-        if in_elysian_mode != bool(elysian_realm):
-            return False
-
-        if not elysian_realm:
-            image = self.context.tasker.controller.post_screencap().wait().get()
-            if not self.context.run_recognition("战斗逻辑-战斗中", image):
-                return False
         return self.context.run_action(f"qte{target}")
 
     def lens_lock(self):
@@ -315,13 +305,8 @@ class CombatActions:
     def switch(self):
         """
         切换角色
-        切换当前-战斗中的角色。
+        切换当前战斗中的角色。
         """
-        switch_node = self.context.get_node_data("切换角色开关")
-        if switch_node is None or not switch_node.get("enabled", False):
-            print("切人逻辑开关未开启,跳过")
-            return
-
         # 记录目前角色生命值
         current_hp = self.get_hp_percent(False)
         target_node = self.context.get_node_data("准备切换角色")
@@ -352,4 +337,4 @@ class CombatActions:
                     return
             self.trigger_qte(target)  # 尝试重新点击
             self.attack()  # 防止发呆
-        self.context.override_pipeline({"战斗逻辑-识别人物": {"enabled": True}})
+        self.context.override_pipeline({"识别人物": {"enabled": True}})
